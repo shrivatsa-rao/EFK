@@ -1,0 +1,32 @@
+filebeat.inputs:
+- type: http_endpoint
+  enabled: true
+  listen_address: 0.0.0.0
+  listen_port: 9010
+  prefix: "kong"
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+setup.template.settings:
+  index.number_of_shards: 1
+setup.ilm.enabled: false
+setup.template.name: "kong"
+setup.template.pattern: "kong-*"
+setup.template.json.enabled: true
+setup.template.json.name: "kong"
+setup.template.json.path: "/usr/share/filebeat/elasticsearch_template.json"
+
+setup.kibana:
+  host: "kibana:5601"
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "kong-%{+YYYY.MM.dd}"
+
+processors:
+
+logging.level: debug
+logging.selectors: ["*"]
+
