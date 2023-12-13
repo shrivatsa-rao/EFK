@@ -1,0 +1,45 @@
+version: '3'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - elastic
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.9.3
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+    networks:
+      - elastic
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.9.3
+    container_name: filebeat
+    user: root
+    ports:
+      - 9010:9010
+    depends_on:
+      - elasticsearch
+    command: ["--strict.perms=false"]
+    volumes:
+      - ./filebeat.yaml:/usr/share/filebeat/filebeat.yml
+      - ./elasticsearch_template.json:/usr/share/filebeat/elasticsearch_template.json
+    networks:
+      - elastic
+
+networks:
+  elastic:
+    driver: bridge
+
+
